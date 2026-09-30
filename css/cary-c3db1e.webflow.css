@@ -1064,7 +1064,7 @@
   flex-flow: row;
   flex: none;
   grid-template-rows: auto;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-auto-columns: 1fr;
   justify-content: center;
   align-items: flex-start;
@@ -1123,6 +1123,13 @@
   height: 2.2em;
 }
 
+.t-image.d {
+  background-image: url('../images/WhatsApp-Image-2026-09-27-at-8.59.02-PM-1.jpeg');
+  background-position: 50%;
+  width: 2.2em;
+  height: 2.2em;
+}
+
 .star-ratings {
   width: 6em;
 }
@@ -1167,6 +1174,11 @@
 
   .container.nav {
     font-size: 1.5vw;
+  }
+
+  .container.footer-var {
+    padding-left: 5em;
+    padding-right: 5em;
   }
 
   .hero-content.grid {

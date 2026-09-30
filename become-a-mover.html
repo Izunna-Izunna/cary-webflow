@@ -1,4 +1,4 @@
-<!DOCTYPE html><!--  This site was created in Webflow. https://webflow.com  --><!--  Last Published: Thu Sep 24 2026 13:59:25 GMT+0000 (Coordinated Universal Time)  -->
+<!DOCTYPE html><!--  This site was created in Webflow. https://webflow.com  --><!--  Last Published: Mon Sep 28 2026 19:47:51 GMT+0000 (Coordinated Universal Time)  -->
 <html data-wf-page="6aac79648746d7640a25fd3a" data-wf-site="69384a604387baf415a42cf2">
 <head>
   <meta charset="utf-8">
@@ -926,6 +926,10 @@
      the collection-links embed. Scrolling steps through them: the live
      one lights up, the others wash back, and the phone shows the thing
      that reason is actually talking about.
+     ══════════ DESKTOP ONLY ══════════
+     The pinning, the runway and the phone are all desktop. Below
+     860px it's a plain vertical list of six cards and the script sits
+     out — see ON A PHONE in the CSS.
      ══════════ HOW THE SCROLL WORKS ══════════
      The embed makes its own scroll runway. .mb-scroll is taller than
      the pinned box and .mb-sticky pins inside it, so the section holds
@@ -969,7 +973,6 @@
   --wa-bg:#efe7de;
   --wa-head:#f6f5f3;
   --wa-green:#d9fdd3;
-  --fade:#fff;         /* what the half phone dissolves into on mobile */
   width:100%;
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
@@ -1285,70 +1288,41 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
   .mb-sticky{top:clamp(20px,6vh,70px)}
 }
 /* ══════════════════════════════════════════════════════════
-   ON A PHONE — pinned, like desktop, but arranged for one hand
-   A full phone with six cards stacked under it is far too tall for one
-   screen, so two things make it fit:
-     · the phone is a HALF view — the stage clips it and a gradient
-       dissolves the bottom, so it costs ~380px instead of 630
-     · the six cards are a horizontal strip instead of a stack, and the
-       script slides the live one into the middle as you scroll
+   ON A PHONE — just the six, listed
+   No phone, no pinning, no runway. A scroll-jacked section that holds
+   the page still costs a phone user far more than it costs a desktop
+   one, and the six reasons say what they need to say on their own —
+   the handset was illustrating them, not carrying them.
+   The card markup is the desktop markup: .mb-list and .mb-col both go
+   display:contents so all six steps become rows of one grid, in
+   document order. No reordering needed — the left column is 1, 2, 3
+   and the right is 4, 5, 6 already.
+   The driver is switched off here too (see isList() in the script).
+   Left running it would pulse .on through six static cards forever
+   for no reason.
    ══════════════════════════════════════════════════════════ */
 @media (max-width:860px){
-  /* --cut is how much of the phone shows before it dissolves, and the
-     fade has to START below the last bubble, so these move together. */
-  .mb-wrap{--s:.58;--cut:.78;--travel:300vh;--half:258px}
-  .mb-sticky{position:sticky;top:clamp(10px,2.5vh,22px);display:block;padding:0}
-  /* ══════════════════════════════════════════════════════════
-     The phone stays in normal flow, ABOVE the strip — it must not live
-     inside the scrolling element. Mobile Chrome and Safari clip an
-     absolutely-positioned descendant of an overflow-x:auto scroller
-     even when its containing block is an ancestor of that scroller,
-     which is how the links embed lost its phone on real handsets.
-     Hence .mb-list wrapping only the cards.
-     ══════════════════════════════════════════════════════════ */
-  .mb-grid{display:block;max-width:none;margin:0;gap:0}
-  .mb-stage{
-    position:relative;margin:0 auto;
-    height:calc(var(--ph-h) * var(--s) * var(--cut));
-    overflow:hidden;
+  .mb-scroll{height:auto}                    /* the runway goes */
+  .mb-sticky{position:static;display:block;padding:0 16px}
+  .mb-grid{
+    display:grid;grid-template-columns:1fr;gap:12px;
+    max-width:560px;margin:0 auto;
   }
-  /* the dissolve. A gradient overlay rather than a mask: a masked
-     element that also carries a transform can rasterise blank in
-     WebKit, and .mb-fit is exactly that. */
-  .mb-stage::after{
-    content:"";position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(to bottom,
-      rgba(255,255,255,0) 82%, var(--fade) 99%);
-  }
-  /* ── the strip, under the phone ──
-     The columns dissolve so all six cards become flex items of the
-     strip. No -webkit-overflow-scrolling:touch — iOS gives momentum
-     scrolling for free now, and that property puts the scroller on its
-     own layer, which is what made out-of-flow children vanish. */
-  .mb-list{
-    display:flex;flex-wrap:nowrap;gap:11px;
-    margin-top:14px;padding:2px 16px 6px;
-    overflow-x:auto;overscroll-behavior-x:contain;
-    scroll-snap-type:x proximity;scrollbar-width:none;
-  }
-  .mb-list::-webkit-scrollbar{display:none}
-  .mb-col{display:contents}
-  .mb-s1{order:1}.mb-s2{order:2}.mb-s3{order:3}
-  .mb-s4{order:4}.mb-s5{order:5}.mb-s6{order:6}
+  .mb-list,.mb-col{display:contents}
+  .mb-stage{display:none}                    /* the phone goes */
   .mb-rail{display:none}
+  /* ── one reason, as a card ──
+     All six at full strength. .on still lands on one of them (the
+     markup ships it on the first), so it's explicitly neutralised
+     rather than left to flip one icon black and look like a bug. */
   .mb-step{
-    flex:0 0 82%;scroll-snap-align:center;
-    opacity:1;                       /* nothing is dimmed on a phone */
-    align-items:flex-start;gap:12px;
-    padding:14px 15px;border-radius:14px;
-    background:#fff;box-shadow:0 0 0 1px rgba(20,17,16,.06);
-    -webkit-tap-highlight-color:transparent;
-    transition:box-shadow .35s ease;
+    opacity:1;align-items:flex-start;gap:13px;
+    padding:15px 16px 16px;border-radius:14px;background:#fff;
+    box-shadow:0 0 0 1px rgba(20,17,16,.07),0 2px 10px rgba(45,38,30,.05);
   }
-  .mb-step.on{box-shadow:0 0 0 1.5px rgba(20,17,16,.42),0 6px 18px rgba(45,38,30,.10)}
-  .mb-step:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .mb-step.on .mb-num{background-color:var(--pale);color:var(--ink)}
   .mb-name{font-size:17px}
-  .mb-say{font-size:14px;margin-top:3px}
+  .mb-say{font-size:14px;margin-top:5px}
 }
 @media (prefers-reduced-motion:reduce){
   .mb-step,.mb-num,.mb-panel,.mb-row,.mb-rail i{transition-duration:.01ms}
@@ -1599,7 +1573,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
                   <div class="mb-list" data-mb-list="">
                     <!--  ═══ 1, 2, 3 down the left ═══  -->
                     <div class="mb-col a">
-                      <div class="mb-step mb-s1 on" role="button" tabindex="0" data-mb-step="">
+                      <div class="mb-step on" role="button" tabindex="0" data-mb-step="">
                         <span class="mb-num" aria-hidden="true"><svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2.6" y="6" width="18.8" height="12" rx="2.6"></rect>
                             <circle cx="12" cy="12" r="2.9"></circle>
@@ -1610,7 +1584,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
                           <span class="mb-say">What you quote is what you earn. We take no commission. The customer pays a small booking fee, and your price is yours.</span>
                         </span>
                       </div>
-                      <div class="mb-step mb-s2" role="button" tabindex="0" data-mb-step="">
+                      <div class="mb-step" role="button" tabindex="0" data-mb-step="">
                         <span class="mb-num" aria-hidden="true"><svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="5" y="4" width="14" height="17" rx="2.6"></rect>
                             <rect x="9" y="2.2" width="6" height="3.7" rx="1.3"></rect>
@@ -1621,7 +1595,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
                           <span class="mb-say">Every job arrives with photos, access details, stairs, parking and distance. Quote properly without a site visit or a phone call.</span>
                         </span>
                       </div>
-                      <div class="mb-step mb-s3" role="button" tabindex="0" data-mb-step="">
+                      <div class="mb-step" role="button" tabindex="0" data-mb-step="">
                         <span class="mb-num" aria-hidden="true"><svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="6" y="2.5" width="12" height="19" rx="3"></rect>
                             <path d="M10.3 5.3h3.4"></path>
@@ -1635,7 +1609,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
                     </div>
                     <!--  ═══ 4, 5, 6 down the right ═══  -->
                     <div class="mb-col b">
-                      <div class="mb-step mb-s4" role="button" tabindex="0" data-mb-step="">
+                      <div class="mb-step" role="button" tabindex="0" data-mb-step="">
                         <span class="mb-num" aria-hidden="true"><svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M13.6 2.6L5.2 13.3h5.1L9.9 21.4 18.8 10.7h-5.3z"></path>
                           </svg></span>
@@ -1644,7 +1618,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
                           <span class="mb-say">Payment is released once the customer confirms the job is complete, straight to your account.</span>
                         </span>
                       </div>
-                      <div class="mb-step mb-s5" role="button" tabindex="0" data-mb-step="">
+                      <div class="mb-step" role="button" tabindex="0" data-mb-step="">
                         <span class="mb-num" aria-hidden="true"><svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="5" width="18" height="16" rx="3"></rect>
                             <path d="M3 10h18M8 3v4M16 3v4"></path>
@@ -1654,7 +1628,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
                           <span class="mb-say">Accept what fits. Ignore what doesn't. No obligation either way.</span>
                         </span>
                       </div>
-                      <div class="mb-step mb-s6" role="button" tabindex="0" data-mb-step="">
+                      <div class="mb-step" role="button" tabindex="0" data-mb-step="">
                         <span class="mb-num" aria-hidden="true"><svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="4.6" y="10.4" width="14.8" height="10.6" rx="2.6"></rect>
                             <path d="M8.2 10.4V7a3.9 3.9 0 017.2-2"></path>
@@ -1698,6 +1672,14 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
     var N = Math.min(panels.length, steps.length);
     if (!runway || !sticky || !N) return;
     var cur = 0, timer = null, ticking = false;
+    /* Below 860px this is a static list: no runway to read, nothing to
+       step through. Every entry point checks here rather than relying
+       on progress() returning -1, because a list with no runway would
+       otherwise fall through to the timer and cycle .on through six
+       cards that all look the same. Re-evaluated per call, so rotating
+       a tablet into desktop width starts it properly. */
+    var mobile = window.matchMedia ? window.matchMedia("(max-width:860px)") : null;
+    function isList(){ return !!(mobile && mobile.matches); }
     function set(i) {
       if (i === cur) return;
       cur = i;
@@ -1785,6 +1767,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
       ticking = true;
       requestAnimationFrame(function () {
         ticking = false;
+        if (isList()) { stopTimer(); return; }
         var p = progress();
         if (p < 0) { fallback(); return; }
         stopTimer();
@@ -1797,7 +1780,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
        click there would be undone by the very next scroll event and
        feel broken. progress() < 0 is exactly "nothing is pinning". */
     function pick(i) {
-      if (progress() >= 0) return;
+      if (isList() || progress() >= 0) return;
       set(i);
       if (timer) { stopTimer(); fallback(); }   /* restart the dwell */
     }
@@ -1812,7 +1795,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
       })(t);
     }
     function fallback() {
-      if (timer) return;
+      if (timer || isList()) return;
       timer = setInterval(function () { set((cur + 1) % N); }, TICK);
     }
     if (!window.requestAnimationFrame) { fallback(); return; }
@@ -1996,7 +1979,7 @@ button.mb-act:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
               <div class="footer-links-wrapper">
                 <div class="footer-links-header">Product</div>
                 <div class="f-links">
-                  <a href="#" class="link">Try Cary Now</a>
+                  <a href="https://wa.me/447345942352?text=Hi%20Scout%2C%20I&#x27;d%20like%20to%20get%20removals%20quotes%20in%20Cardiff" target="_blank" class="link">Try Cary Now</a>
                   <a href="https://wa.me/447345942352?text=Hi%2C%20I&#x27;d%20like%20to%20join%20Cary%20as%20a%20mover%20in%20Cardiff" target="_blank" class="link">Become a mover</a>
                 </div>
               </div>
